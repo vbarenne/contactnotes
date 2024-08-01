@@ -12,7 +12,6 @@ import streamlit as st
 import numpy as np
 from audio_recorder_streamlit import audio_recorder
 from datetime import datetime
-from test import prompt_model
 from models import UploadMethod, CommunicationChannel, ContactType
 from helper.prompt_helpers import get_options
 from helper.display_helpers import set_stage, add_field, delete_field, display_note, successful_submission_message, button_click

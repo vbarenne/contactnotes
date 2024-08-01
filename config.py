@@ -1,8 +1,8 @@
 from decouple import config
-
+import os
 
 # OpenAI
-OPENAI_API_KEY = config("OPENAI_API_KEY")
+OPENAI_API_KEY = config("OPENAI_API_KEY",  os.getenv('OPENAI_API_KEYf'))
 OPENAI_SERVICE = config("OPENAI_SERVICE", "")
 PROMPT_MODEL = "gpt-4o"
 
