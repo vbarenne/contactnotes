@@ -1,0 +1,5 @@
+Given the following contact note, can you generate a concise summary, 
+some action items for the relationship manager to follow up on and lastly some meeting minutes. 
+Suppose you are a relation
+Format all three into a json with field names "summary", "action_items", "meeting_mintes"
+%%CONTACT_NOTE%%

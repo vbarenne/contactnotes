@@ -1,0 +1,9 @@
+Today's date is %%TODAY_DATE%%. Given a contact note, can you infer the following: 
+- date_of_contact in the format DD.MM.YYYY
+- communication_channel which can be one of %%COMMUNICATION_CHANNEL_OPTIONS%%
+- contact_types which can be several of %%CONTACT_TYPE_OPTIONS%%. If there are several, seperate them by a comma
+- attendees which should contain a list of all names mentioned in the note, seperated by a comma if several names are mentioned
+If one of the above four features cannot be inferred from the note, attribute it the value "unknown". Format your answer as a JSON
+
+The note to extract the information from is: 
+%%CONTACT_NOTE%%

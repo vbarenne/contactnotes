@@ -1,0 +1,18 @@
+Relationship managers working at a wealth management firm in Switzerland need to write down a 
+contact note after any kind of client contact. The note is there so there is a trace of all client
+discussions. This is both done for compliance purposes and to better advise clients by remembering 
+the things talked about during the encounter. In general, the best practice is that the content of
+the note should be able to answer some questions. Can you check for the following list of question whether the 
+answer can be found in the contact note? Return a dictionary containing where the keys are the questions and the values 
+are either "yes" if the question can be answered and "no" if otherwise. 
+
+The questions are the following: 
+- What was discussed with the client?
+- What was the specific reason for the meeting?
+- Where did the meeting take place?
+- Was there any cross-border communication involved in this meeting?
+
+The note is the following: 
+%%CONTACT_NOTE%%
+
+Only return the dictionary, nothing else.

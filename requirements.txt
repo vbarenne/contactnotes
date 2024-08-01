@@ -1,0 +1,11 @@
+python-decouple
+streamlit
+audio_recorder_streamlit
+
+
+numpy
+openai
+pandas
+pydantic
+
+
