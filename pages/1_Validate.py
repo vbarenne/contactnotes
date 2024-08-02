@@ -25,6 +25,9 @@ st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', uns
 st.markdown("# Validate")
 initialize_session_state()
 
+
+st.session_state.is_live_demo = st.sidebar.toggle("Live Demo", value=False)
+
 st.markdown("## 1. Upload a voice recording or text file")
 upload_method = st.radio(label= "Upload Method", 
                          options= [m.value for m in UploadMethod], 
@@ -37,22 +40,28 @@ if upload_method == UploadMethod.Manual:
                         )
     st.button('Upload Note', on_click=button_click, args = (1, note), disabled= st.session_state.buttons_click_status[0])
     
-# elif upload_method == "Joice":
-#     note = st.file_uploader("Choose an audio file to transcribe into contact notes", 
-#                              accept_multiple_files=False)
+elif upload_method == "Joice":
+    uploaded_file = st.file_uploader("Choose an audio file to transcribe into contact notes", 
+                             accept_multiple_files=False,
+                             disabled= st.session_state.buttons_click_status[0])
     
-#     st.button("Transcribe audio file using Joice", on_click=set_stage, args=(0.5,))
+    st.button("Transcribe audio file using Joice", 
+              on_click=button_click, 
+              args=(0.5,), 
+              disabled= st.session_state.buttons_click_status[0])
     
-#     if note and st.session_state.stage > 0: 
-#         with open('recording1.txt') as notes:
-#             st.session_state.text = notes.read()
-#         note = st.text_area("Edit the transcription below to make any corrections necessary:", 
-#                                    value=st.session_state.text, 
-#                                    height = 100)
-#         st.button('Confirm Edits', on_click=add_session_note_history)
+    if uploaded_file and st.session_state.stage > 0: 
+        # with open('recording1.txt') as notes:
+        #     st.session_state.text = notes.read()
+        st.session_state.text = uploaded_file.read().decode("utf-8")
+        note = st.text_area("Edit the transcription below to make any corrections necessary:", 
+                                   value=st.session_state.text, 
+                                   height = 100,
+                                   disabled= st.session_state.buttons_click_status[0])
+        st.button('Confirm Edits', on_click=button_click, args = (1, note), disabled= st.session_state.buttons_click_status[0])
 
-# elif upload_method == "CLM":
-#     st.write("TBD")
+elif upload_method == "CLM":
+    st.write("TBD")
 
 
 
@@ -60,50 +69,54 @@ if st.session_state.stage >= 1:
 
     st.markdown("## 2. Edit contact note details")
     st.markdown("Based on the transcription, the following was inferred. Please make any necessary corrections:")
-    contact_note, channel_index = get_contact_note_information(note)
+    contact_note, channel_index = get_contact_note_information(note, is_live_demo = st.session_state.is_live_demo)
     col1, col2 = st.columns(2)
 
-    with col1: 
-        tile1 = col1.container(border = True)
-        if contact_note["communication_channel"] in get_options(CommunicationChannel): 
-            contact_note["communication_channel"] = tile1.selectbox("Communication Channel", 
-                                                                    get_options(CommunicationChannel),
-                                                                    index = channel_index,
-                                                                    disabled = st.session_state.buttons_click_status[1])
-        if np.isin(np.array(contact_note["contact_types"]), np.array(get_options(ContactType))).all():
-            contact_note["contact_types"]= tile1.multiselect("Contact Type(s)", 
-                                                            get_options(ContactType), 
-                                                            default= contact_note["contact_types"],
-                                                            disabled = st.session_state.buttons_click_status[1])
-        if contact_note["date_of_contact"] !="unknown": 
-            contact_note["date_of_contact"] = tile1.date_input("Date of Contact", 
-                                                            value = datetime.strptime(contact_note["date_of_contact"], "%d.%m.%Y"),
-                                                            disabled = st.session_state.buttons_click_status[1])
-    
+    tile1 = st.container(border = True)
+    if contact_note["communication_channel"] in get_options(CommunicationChannel): 
+        contact_note["communication_channel"] = tile1.selectbox("Communication Channel", 
+                                                                get_options(CommunicationChannel),
+                                                                index = channel_index,
+                                                                disabled = st.session_state.buttons_click_status[1])
+    if np.isin(np.array(contact_note["contact_types"]), np.array(get_options(ContactType))).all():
+        contact_note["contact_types"]= tile1.multiselect("Contact Type(s)", 
+                                                        get_options(ContactType), 
+                                                        default= contact_note["contact_types"],
+                                                        disabled = st.session_state.buttons_click_status[1])
+    if contact_note["date_of_contact"] !="unknown": 
+        contact_note["date_of_contact"] = tile1.date_input("Date of Contact", 
+                                                        value = datetime.strptime(contact_note["date_of_contact"], "%d.%m.%Y"),
+                                                        disabled = st.session_state.buttons_click_status[1])
 
-    with col2: 
-        tile2 = col2.container(border = True)
-        if "fields_size" not in st.session_state:
-            st.session_state.fields_size = len(contact_note["attendees"])
-            st.session_state.fields = contact_note["attendees"]
-            st.session_state.deletes = []
+    contact_note["attendees"] = tile1.text_input("Attendees", 
+                                                    value = "; ".join(contact_note["attendees"]),
+                                                    disabled = st.session_state.buttons_click_status[1])
+
+    contact_note["attendees"] = [a.strip() for a in contact_note["attendees"].split(";")]
+
+    # with col2: 
+    #     tile2 = col2.container(border = True)
+    #     if "fields_size" not in st.session_state:
+    #         st.session_state.fields_size = len(contact_note["attendees"])
+    #         st.session_state.fields = contact_note["attendees"]
+    #         st.session_state.deletes = []
         
-        c1, c2 = tile2.columns(2)
-        # fields and types of the table
-        for i in range(st.session_state.fields_size):
-            value = contact_note["attendees"][i] if len(contact_note["attendees"]) > i else None
-            with c1:
-                st.session_state.fields.append(st.text_input(f"Attendee {i +1}", 
-                                                             value = value,
-                                                             disabled = st.session_state.buttons_click_status[1]))
-            with c2:
-                st.session_state.deletes.append(st.button("X", 
-                                                          key=f"delete{i +1}", 
-                                                          on_click=delete_field, args=(i,),
-                                                          disabled = st.session_state.buttons_click_status[1]
-                                                          ))
-        tile2.button("+ Add Attendee", on_click=add_field, disabled = st.session_state.buttons_click_status[1])
-
+    #     c1, c2 = tile2.columns(2)
+    #     # fields and types of the table
+    #     for i in range(st.session_state.fields_size):
+    #         value = contact_note["attendees"][i] if len(contact_note["attendees"]) > i else None
+    #         with c1:
+    #             st.session_state.fields.append(st.text_input(f"Attendee {i +1}", 
+    #                                                          value = value,
+    #                                                          disabled = st.session_state.buttons_click_status[1]))
+    #         with c2:
+    #             st.session_state.deletes.append(st.button("X", 
+    #                                                       key=f"delete{i +1}", 
+    #                                                       on_click=delete_field, args=(i,),
+    #                                                       disabled = st.session_state.buttons_click_status[1]
+    #                                                       ))
+    #     tile2.button("+ Add Attendee", on_click=add_field, disabled = st.session_state.buttons_click_status[1])
+    
     st.button('Confirm Details', on_click=button_click, args = (2,), disabled = st.session_state.buttons_click_status[1])
     
 if st.session_state.stage >=2:
@@ -111,7 +124,7 @@ if st.session_state.stage >=2:
     display_note(contact_note)
     st.markdown(f"""In order to protect the client, the bank and yourself, the five 'W's should be 
                     documented in each contact note.""")              
-    questions = check_note_for_missing_information(contact_note["text"])
+    questions = check_note_for_missing_information(contact_note["text"], is_live_demo = st.session_state.is_live_demo)
 
     if len(questions) == 0: 
         check_results = "Based on our analysis, the contact note entered seems to be complete."

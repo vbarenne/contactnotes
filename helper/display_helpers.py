@@ -29,5 +29,8 @@ def display_note(note):
 def button_click(button_no, text=""):
     if text!="":
         add_note_to_history(text)
-    st.session_state.stage += 1
-    st.session_state.buttons_click_status[button_no-1] = True
+    st.session_state.stage = button_no
+    if button_no in range(len(st.session_state.buttons_click_status)):
+        st.session_state.buttons_click_status[button_no-1] = True
+
+ 

@@ -1,5 +1,26 @@
-Given the following contact note, can you generate a concise summary, 
-some action items for the relationship manager to follow up on and lastly some meeting minutes. 
-Suppose you are a relation
-Format all three into a json with field names "summary", "action_items", "meeting_mintes"
-%%CONTACT_NOTE%%
+Given the following contact note written by a relationship manager at a private wealth management firm after a client encounter, 
+can you generate the following: 
+1. A concise summary of the contact note
+2. Some action items and things for the relationship manager to follow up on based on what is mentioned in the note. 
+Be detailed. This should be formatted as a simple python list containing strings. Each list element corresponding to one action item. 
+3. The meeting minutes for the encounter described in the note. The meeting minutes should include the following:
+- Date and Location: When and where the meeting took place
+- List of participants besides the relationship manager himself
+- Summary of the discussions
+- Decisions Made: Any resolutions or decisions that were agreed upon during the meeting.
+- Action items: based on the action items found in point 2. 
+- Next Meeting: Date and time of the next meeting (if applicable).
+
+The content of the contact note is the following: 
+%%CONTACT_NOTE%%. 
+
+The date the meeting took place is: %%DATE_OF_CONTACT%%. 
+The contact was through the following communication channel: %%COMMUNICATION_CHANNEL%%. 
+The contact types or reasons for the meeting were: %%CONTACT_TYPES%%. 
+The attendees were %%ATTENDEES%%
+
+Format your answer into a JSON containing fields "summary", "action_items" and "meeting_minutes". 
+The content of the meeting of the meeting minutes field should be one long string containing markdown formatting elements. 
+Only provide this JSON as your answer. 
+
+
