@@ -18,7 +18,6 @@ import ast
 st.set_page_config(page_title="Action Items & Minutes", page_icon="📈")
 st.markdown("# Action Items & Meeting Minutes")
 
-st.write(st.session_state.is_live_demo)
 note_info = copy.deepcopy(st.session_state.validated_note)
 display_note(note_info)
 

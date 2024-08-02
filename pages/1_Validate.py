@@ -21,12 +21,11 @@ import copy
 
 ## Page Setup
 st.set_page_config(page_title="Validate", page_icon="📈")
+st.session_state.is_live_demo = st.sidebar.toggle("Live Demo", value=False)
 st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
 st.markdown("# Validate")
 initialize_session_state()
 
-
-st.session_state.is_live_demo = st.sidebar.toggle("Live Demo", value=False)
 
 st.markdown("## 1. Upload a voice recording or text file")
 upload_method = st.radio(label= "Upload Method", 
