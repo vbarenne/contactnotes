@@ -1,12 +1,7 @@
 Given the following contact note written by a relationship manager at a private wealth management firm after a client encounter below:
 
-The content of the contact note is the following: 
-%%CONTACT_NOTE%%. 
-
-The date the meeting took place is: %%DATE_OF_CONTACT%%. 
-The contact was through the following communication channel: %%COMMUNICATION_CHANNEL%%. 
-The contact types or reasons for the meeting were: %%CONTACT_TYPES%%. 
-The attendees were %%ATTENDEES%%
+The contact note and its meta data is the following: 
+%%CONTACT_NOTE_TEXT%%. 
 
 Can you answer the following question? If you do not know based on the contact note above only, just say you don't know. 
 

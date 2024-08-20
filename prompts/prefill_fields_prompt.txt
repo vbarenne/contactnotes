@@ -1,5 +1,8 @@
 Today's date is %%TODAY_DATE%%. Given a contact note, can you infer the following: 
-- date_of_contact in the format DD.MM.YYYY
+- start_date in the format DD.MM.YYYY. The date at which the contact started.
+- end_date in the format DD.MM.YYYY. The date at which the contact ended, it must on the same day or later than the start_date.
+- start_time in the format hh:mm
+- end_time in the format hh:mm
 - communication_channel which can be one of %%COMMUNICATION_CHANNEL_OPTIONS%%
 - contact_types which can be several of %%CONTACT_TYPE_OPTIONS%%. If there are several, seperate them by a comma
 - attendees which should contain a list of all names mentioned in the note, seperated by a comma if several names are mentioned

@@ -13,6 +13,7 @@ from openai import OpenAI
 from config import PROMPT_MODEL
 import copy
 from helper.prompt_helpers import load_prompt_templ
+from helper.display_helpers import get_note_info_as_text
 
 st.set_page_config(page_title="Search", page_icon="📈")
 st.markdown("# Search")
@@ -21,12 +22,12 @@ client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Get the inputted note to give as context to the chatbot
 note_info = copy.deepcopy(st.session_state.validated_note)
-contact_note_context = load_prompt_templ("prompts/chatbot_context.txt", 
-                            {"CONTACT_NOTE": note_info["text"],
-                            "DATE_OF_CONTACT": note_info["date_of_contact"].strftime("%d.%m.%Y"),
-                            "COMMUNICATION_CHANNEL": note_info["communication_channel"],
-                            "CONTACT_TYPES": "; ".join(note_info["contact_types"]),
-                            "ATTENDEES": "; ".join(note_info["attendees"])})
+if note_info["start_date"] != note_info["end_date"]: 
+    contact_time_span = note_info["start_date"].strftime("%d.%m.%Y") + " " + note_info["start_time"].strftime("%H:%M") +  " - " + note_info["end_date"].strftime("%d.%m.%Y") + " " + note_info["end_time"].strftime("%H:%M")
+else: 
+    contact_time_span = note_info["start_date"].strftime("%d.%m.%Y") + " " + note_info["start_time"].strftime("%H:%M") + " - " + note_info["end_time"].strftime("%H:%M")
+
+contact_note_context = load_prompt_templ("prompts/chatbot_context.txt", {"CONTACT_NOTE_TEXT": get_note_info_as_text(note_info)})
 
 # st.caption("🚀 A Streamlit chatbot powered by OpenAI")
 if "messages" not in st.session_state:

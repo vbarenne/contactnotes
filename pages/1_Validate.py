@@ -11,17 +11,18 @@ import numpy as np
 import streamlit as st
 import numpy as np
 from audio_recorder_streamlit import audio_recorder
-from datetime import datetime
+from datetime import datetime, timedelta
 from models import UploadMethod, CommunicationChannel, ContactType
 from helper.prompt_helpers import get_options
 from helper.display_helpers import set_stage, add_field, delete_field, display_note, successful_submission_message, button_click
 from helper.validate_helpers import get_contact_note_information, check_note_for_missing_information
 from helper.session_storage import add_note_to_history, initialize_session_state, save_contact_note_state
 import copy
+from country_list import countries_for_language
 
 ## Page Setup
 st.set_page_config(page_title="Validate", page_icon="📈")
-st.session_state.is_live_demo = st.sidebar.toggle("Live Demo", value=False)
+st.session_state.is_live_demo = st.sidebar.toggle("Live Demo", value=True)
 st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
 st.markdown("# Validate")
 initialize_session_state()
@@ -65,27 +66,29 @@ elif upload_method == "CLM":
 
 
 if st.session_state.stage >= 1:
-
+    
     st.markdown("## 2. Edit contact note details")
     st.markdown("Based on the transcription, the following was inferred. Please make any necessary corrections:")
     contact_note, channel_index = get_contact_note_information(note, is_live_demo = st.session_state.is_live_demo)
     col1, col2 = st.columns(2)
-
     tile1 = st.container(border = True)
-    if contact_note["communication_channel"] in get_options(CommunicationChannel): 
-        contact_note["communication_channel"] = tile1.selectbox("Communication Channel", 
-                                                                get_options(CommunicationChannel),
-                                                                index = channel_index,
-                                                                disabled = st.session_state.buttons_click_status[1])
-    if np.isin(np.array(contact_note["contact_types"]), np.array(get_options(ContactType))).all():
-        contact_note["contact_types"]= tile1.multiselect("Contact Type(s)", 
-                                                        get_options(ContactType), 
-                                                        default= contact_note["contact_types"],
-                                                        disabled = st.session_state.buttons_click_status[1])
-    if contact_note["date_of_contact"] !="unknown": 
-        contact_note["date_of_contact"] = tile1.date_input("Date of Contact", 
-                                                        value = datetime.strptime(contact_note["date_of_contact"], "%d.%m.%Y"),
-                                                        disabled = st.session_state.buttons_click_status[1])
+
+    contact_note["communication_channel"] = tile1.selectbox("Communication Channel", 
+                                                            get_options(CommunicationChannel),
+                                                            index = channel_index,
+                                                            disabled = st.session_state.buttons_click_status[1])
+    
+    
+    contact_note["contact_types"]= tile1.multiselect("Contact Type(s)", 
+                                                    get_options(ContactType), 
+                                                    default= contact_note["contact_types"],
+                                                    disabled = st.session_state.buttons_click_status[1])
+
+    cols = tile1.columns(4)
+    contact_note["start_date"] = cols[0].date_input(label = "Start of Contact", value = contact_note["start_date"])
+    contact_note["start_time"] = cols[1].time_input(label = "Start of Contact", value = contact_note["start_time"], label_visibility= "hidden")
+    contact_note["end_date"] = cols[2].date_input(label = "End of Contact", value = contact_note["end_date"])
+    contact_note["end_time"] = cols[3].time_input(label = "End of Contact", value = contact_note["end_time"], label_visibility= "hidden")
 
     contact_note["attendees"] = tile1.text_input("Attendees", 
                                                     value = "; ".join(contact_note["attendees"]),
@@ -93,49 +96,41 @@ if st.session_state.stage >= 1:
 
     contact_note["attendees"] = [a.strip() for a in contact_note["attendees"].split(";")]
 
-    # with col2: 
-    #     tile2 = col2.container(border = True)
-    #     if "fields_size" not in st.session_state:
-    #         st.session_state.fields_size = len(contact_note["attendees"])
-    #         st.session_state.fields = contact_note["attendees"]
-    #         st.session_state.deletes = []
-        
-    #     c1, c2 = tile2.columns(2)
-    #     # fields and types of the table
-    #     for i in range(st.session_state.fields_size):
-    #         value = contact_note["attendees"][i] if len(contact_note["attendees"]) > i else None
-    #         with c1:
-    #             st.session_state.fields.append(st.text_input(f"Attendee {i +1}", 
-    #                                                          value = value,
-    #                                                          disabled = st.session_state.buttons_click_status[1]))
-    #         with c2:
-    #             st.session_state.deletes.append(st.button("X", 
-    #                                                       key=f"delete{i +1}", 
-    #                                                       on_click=delete_field, args=(i,),
-    #                                                       disabled = st.session_state.buttons_click_status[1]
-    #                                                       ))
-    #     tile2.button("+ Add Attendee", on_click=add_field, disabled = st.session_state.buttons_click_status[1])
+    contact_note["cross_border"] = tile1.radio(label= "Cross-border Activity", 
+                            options= ["Yes", "No"], 
+                            index = None)
     
+    if contact_note["cross_border"] =="Yes":
+        contact_note["country"] = tile1.selectbox("Country", options = [country for (iso, country) in dict(countries_for_language('en')).items()])
+    else: 
+        contact_note["country"] = None 
     st.button('Confirm Details', on_click=button_click, args = (2,), disabled = st.session_state.buttons_click_status[1])
     
-if st.session_state.stage >=2:
+
+
+if st.session_state.stage >=2:   
     st.markdown("## 3. Validate Contact Notes")
+    contact_note["text"] = st.session_state.note_history[-1]["note_content"]
     display_note(contact_note)
     st.markdown(f"""In order to protect the client, the bank and yourself, the five 'W's should be 
-                    documented in each contact note.""")              
-    questions = check_note_for_missing_information(contact_note["text"], is_live_demo = st.session_state.is_live_demo)
-
-    if len(questions) == 0: 
+                    documented in each contact note.""") 
+    if st.session_state.stage<3:             
+        questions = check_note_for_missing_information(contact_note, is_live_demo = st.session_state.is_live_demo)
+        st.session_state.questions = copy.deepcopy(questions)
+        st.session_state.stage = 3
+    if len(st.session_state.questions) == 0: 
         check_results = "Based on our analysis, the contact note entered seems to be complete."
+        st.write(check_results)
+        edited_note = copy.deepcopy(st.session_state.note_history[-1]["note_content"])
     else: 
         check_results = """Based on our analysis, the contact note seems to be missing some information. 
         Please answer the below question to ensure it is compliant. """
-
+        st.write(check_results)
         additional_information = []
-        for q in questions:
+        for q in st.session_state.questions:
             additional_information.append(st.text_area(q, height = 100, disabled = st.session_state.buttons_click_status[2]))    
-
-    edited_note =  copy.deepcopy(st.session_state.note_history[-1]["note_content"]) + " " + " ".join(additional_information)
+        edited_note =  copy.deepcopy(st.session_state.note_history[-1]["note_content"]) + " " + " ".join(additional_information)
     if st.button('Submit', on_click= button_click, args=(3, edited_note), disabled= st.session_state.buttons_click_status[2]):
         successful_submission_message()        
         save_contact_note_state(contact_note, st.session_state.note_history[-1]["note_content"])
+

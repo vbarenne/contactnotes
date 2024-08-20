@@ -16,15 +16,28 @@ def delete_field(index):
 def successful_submission_message():
     st.markdown(':gray[*Contact Note Successfully Submitted*]')
 
+def get_note_info_as_text(note):
+    if note["start_date"] != note["end_date"]: 
+        contact_time_span = note["start_date"].strftime("%d.%m.%Y") + " " + note["start_time"].strftime("%H:%M") +  " - " + note["end_date"].strftime("%d.%m.%Y") + " " + note["end_time"].strftime("%H:%M")
+    else: 
+        contact_time_span = note["start_date"].strftime("%d.%m.%Y") + " " + note["start_time"].strftime("%H:%M") + " - " + note["end_time"].strftime("%H:%M")
+    
+    country = f" ({note['country']})" if note["country"] is not None else ""
+
+    note_info_string = f"""
+    **Contact Time Span:** {contact_time_span}   
+    **Communication Channel:** {note["communication_channel"]}  
+    **Contact Type(s):** {", ".join(note["contact_types"])}  
+    **Attendees:** {", ".join(note["attendees"])}    
+    **Cross-border Activity:** {note["cross_border"] + country}   
+    **Note:** {note["text"]}
+    """
+    return note_info_string
+
 def display_note(note):
+    note_info_string = get_note_info_as_text(note)
     with st.expander(f"Captured Contact Note", expanded=True): 
-        st.markdown(f"""
-                  **Date of the contact:** {note["date_of_contact"]}  
-                  **Communication Channel:** {note["communication_channel"]}  
-                  **Contact Type(s):** {", ".join(note["contact_types"])}  
-                  **Attendees:** {", ".join(note["attendees"])}  
-                  **Note:** {note["text"]}
-                  """)
+        st.markdown(note_info_string)
         
 def button_click(button_no, text=""):
     if text!="":

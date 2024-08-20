@@ -11,13 +11,8 @@ Be detailed. This should be formatted as a simple python list containing strings
 - Action items: based on the action items found in point 2. 
 - Next Meeting: Date and time of the next meeting (if applicable).
 
-The content of the contact note is the following: 
-%%CONTACT_NOTE%%. 
-
-The date the meeting took place is: %%DATE_OF_CONTACT%%. 
-The contact was through the following communication channel: %%COMMUNICATION_CHANNEL%%. 
-The contact types or reasons for the meeting were: %%CONTACT_TYPES%%. 
-The attendees were %%ATTENDEES%%
+The contact note and its meta data is the following: 
+%%CONTACT_NOTE_TEXT%%.
 
 Format your answer into a JSON containing fields "summary", "action_items" and "meeting_minutes". 
 The content of the meeting of the meeting minutes field should be one long string containing markdown formatting elements. 

@@ -9,10 +9,18 @@ are either "yes" if the question can be answered and "no" if otherwise.
 The questions are the following: 
 - What was discussed with the client?
 - What was the specific reason for the meeting?
-- Where did the meeting take place?
-- Was there any cross-border communication involved in this meeting?
+- Where did the meeting take place? 
 
-The note is the following: 
-%%CONTACT_NOTE%%
+If the communication channel is "In Person", you should also be able to answer the following question very explicitely: 
+- Where did the meeting take place? 
 
-Only return the dictionary, nothing else.
+If the contact types include "Account Opening", you should additionally be able to answer the following questions explicitely. If not, do not try to answer the below questions, just return "yes".
+- How was the client acquired?
+- Why does/did the client want to open an account?
+- What will be the purpose of the account?
+
+
+The contact note and its meta data is the following: 
+%%CONTACT_NOTE_TEXT%%
+
+Only return the dictionary, nothing else. 
