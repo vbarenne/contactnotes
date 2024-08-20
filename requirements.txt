@@ -7,5 +7,5 @@ numpy
 openai
 pandas
 pydantic
-
+country_list
 
